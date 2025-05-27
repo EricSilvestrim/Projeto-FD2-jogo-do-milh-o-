@@ -2,59 +2,51 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAM_TEXTO 256
-
-// Estrutura da Pergunta
-typedef struct {
-    char enunciado[TAM_TEXTO];
-    char alternativas[4][TAM_TEXTO];
-    char correta;
-    int dificuldade;
-} Pergunta;
-
-// Lista dinâmica de perguntas
+//lista dinâmica de perguntas
 typedef struct {
     Pergunta* perguntas;
     int total;
 } ListaPerguntas;
 
-// Função para inicializar a lista
+//função para inicializar a lista
 void inicializarLista(ListaPerguntas* lista) {
     lista->perguntas = NULL;
     lista->total = 0;
 }
 
-// Função para inserir nova pergunta
 void inserirPergunta(ListaPerguntas* lista) {
     Pergunta nova;
 
-    printf("Digite o enunciado da pergunta: ");
-    getchar(); // limpar buffer
-    fgets(nova.enunciado, TAM_TEXTO, stdin);
-    nova.enunciado[strcspn(nova.enunciado, "\n")] = 0;
+    printf("Digite o enunciado da pergunta:\n");
+    getchar(); // limpa o buffer de entrada
+    nova.enunciado = lerTexto(); // usa malloc
 
     for (int i = 0; i < 4; i++) {
-        printf("Digite a alternativa %c: ", 'A' + i);
-        fgets(nova.alternativas[i], TAM_TEXTO, stdin);
-        nova.alternativas[i][strcspn(nova.alternativas[i], "\n")] = 0;
+        printf("Digite a alternativa %c:\n", 'A' + i);
+        nova.alternativas[i] = lerTexto(); // usa malloc
     }
 
-    printf("Qual a letra da alternativa correta (A-D)? ");
-    scanf(" %c", &nova.correta);
+    do {
+        printf("Digite a letra da alternativa correta (A-D): ");
+        scanf(" %c", &nova.correta);
+        nova.correta = toupper(nova.correta);
+    } while (nova.correta < 'A' || nova.correta > 'D');
 
-    printf("Qual o nível de dificuldade (1-Fácil, 2-Médio, 3-Difícil)? ");
-    scanf("%d", &nova.dificuldade);
+    do {
+        printf("Digite o nível de dificuldade (1-Muito Fácil, 2-Fácil, 3-Médio, 4-Difícil, 5-Muito Difícil): ");
+        scanf("%d", &nova.dificuldade);
+    } while (nova.dificuldade < 1 || nova.dificuldade > 5);
 
-    // Redimensiona a lista
+    // Adiciona ao final da lista
     lista->perguntas = realloc(lista->perguntas, (lista->total + 1) * sizeof(Pergunta));
     lista->perguntas[lista->total] = nova;
     lista->total++;
 
-    printf("Pergunta adicionada com sucesso!\n");
+    printf("Pergunta inserida com sucesso!\n");
 }
 
-// Função para listar todas as perguntas
 void listarPerguntas(ListaPerguntas lista) {
+
     if (lista.total == 0) {
         printf("Nenhuma pergunta cadastrada.\n");
         return;
@@ -67,33 +59,45 @@ void listarPerguntas(ListaPerguntas lista) {
             printf("Alternativa %c: %s\n", 'A' + j, lista.perguntas[i].alternativas[j]);
         }
         printf("Correta: %c\n", lista.perguntas[i].correta);
-        printf("Dificuldade: %d\n", lista.perguntas[i].dificuldade);
+
+        // Mostrar dificuldade como texto
+        const char* niveis[] = {
+            "Muito Fácil", "Fácil", "Médio", "Difícil", "Muito Difícil"
+        };
+        int dif = lista.perguntas[i].dificuldade;
+        if (dif >= 1 && dif <= 5) {
+            printf("Dificuldade: %s\n", niveis[dif - 1]);
+        } else {
+            printf("Dificuldade: desconhecida (%d)\n", dif);
+        }
     }
 }
 
-// Pesquisar pergunta por palavra-chave no enunciado
+// Pesquisar pergunta
 void pesquisarPergunta(ListaPerguntas lista) {
-    char palavra[TAM_TEXTO];
-    printf("Digite uma palavra-chave para buscar: ");
+    char palavra[100];
+    int encontrado = 0;
+
+    printf("Digite uma palavra-chave para buscar no enunciado: ");
     getchar();
-    fgets(palavra, TAM_TEXTO, stdin);
+    fgets(palavra, sizeof(palavra), stdin);
     palavra[strcspn(palavra, "\n")] = 0;
 
-    int achou = 0;
     for (int i = 0; i < lista.total; i++) {
         if (strstr(lista.perguntas[i].enunciado, palavra)) {
-            printf("\nEncontrei na pergunta %d:\n", i + 1);
+            printf("\nEncontrada na pergunta %d:\n", i + 1);
             printf("Enunciado: %s\n", lista.perguntas[i].enunciado);
-            achou = 1;
+            encontrado = 1;
         }
     }
-    if (!achou) {
+
+    if (!encontrado)
         printf("Nenhuma pergunta encontrada com essa palavra.\n");
-    }
 }
 
 // Alterar uma pergunta
 void alterarPergunta(ListaPerguntas* lista) {
+
     int indice;
     listarPerguntas(*lista);
     printf("\nDigite o número da pergunta que deseja alterar: ");
@@ -104,7 +108,7 @@ void alterarPergunta(ListaPerguntas* lista) {
         printf("Alterando a pergunta %d:\n", indice + 1);
         inserirPergunta(lista); // vamos reaproveitar a função de inserção
         lista->perguntas[indice] = lista->perguntas[lista->total - 1];
-        lista->total--; // remover o último (duplicado)
+        lista->total--; //remove o último (duplicado)
         lista->perguntas = realloc(lista->perguntas, lista->total * sizeof(Pergunta));
     } else {
         printf("Número inválido.\n");
@@ -113,6 +117,7 @@ void alterarPergunta(ListaPerguntas* lista) {
 
 // Excluir uma pergunta
 void excluirPergunta(ListaPerguntas* lista) {
+    
     int indice;
     listarPerguntas(*lista);
     printf("\nDigite o número da pergunta que deseja excluir: ");
@@ -131,21 +136,22 @@ void excluirPergunta(ListaPerguntas* lista) {
     }
 }
 
-// Menu principal
-int main() {
+int main(){
+
     ListaPerguntas lista;
     inicializarLista(&lista);
 
     int opcao;
+
     do {
-        printf("\n=== MENU ===\n");
+        printf("\n----- MENU -----\n");
         printf("1. Inserir pergunta\n");
         printf("2. Listar perguntas\n");
         printf("3. Pesquisar pergunta\n");
         printf("4. Alterar pergunta\n");
         printf("5. Excluir pergunta\n");
         printf("0. Sair\n");
-        printf("Escolha: ");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
 
         switch (opcao) {
@@ -159,7 +165,7 @@ int main() {
         }
     } while (opcao != 0);
 
-    free(lista.perguntas); // liberar memória
+    free(lista.perguntas); //libera memória
 
     return 0;
-}
+}//main
