@@ -87,8 +87,8 @@ int main() {
     BancoDePerguntas *banco = NULL;
     int opcao;
     // int dadosCarregados = 0; // Removido - não utilizado
-    const char *arquivoBinario = "/home/ubuntu/dados/perguntas.bin";
-    const char *arquivoCSVInicial = "/home/ubuntu/perguntas_iniciais.csv";
+    const char *arquivoCSVInicial = "/home/ubuntu/perguntas_iniciais.csv"; //Para rodar no Linux
+    const char *arquivoCSVInicial = "C:\\Users\\danie\\Downloads\\perguntas_iniciais.csv"; //Para rodar no Windows. Mexam só para onde está o arquivo do csv
 
     // Inicializa o gerador de números aleatórios para o jogo
     srand(time(NULL));
@@ -366,7 +366,7 @@ int carregarPerguntasCSV(BancoDePerguntas *banco, const char *nomeArquivo) {
 
         // Usa strtok para separar os campos por vírgula
         // Cuidado: strtok modifica a string original!
-        token = strtok(ptr, ",");
+        token = strtok(ptr, ";");
         while (token != NULL && campo < 7) {
             // Remove espaços em branco no início/fim do token (trim)
             while (isspace((unsigned char)*token)) token++;
@@ -384,7 +384,7 @@ int carregarPerguntasCSV(BancoDePerguntas *banco, const char *nomeArquivo) {
                 case 5: p.respostaCorreta = toupper(token[0]); break; // Pega só o primeiro caractere
                 case 6: p.dificuldade = atoi(token); break;
             }
-            token = strtok(NULL, ","); // Pega o próximo token
+            token = strtok(NULL, ";"); // Pega o próximo token
             campo++;
         }
 
