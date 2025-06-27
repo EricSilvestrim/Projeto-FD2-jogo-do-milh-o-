@@ -1,4 +1,4 @@
-#include "../include/perguntas.h"
+#include "perguntas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
