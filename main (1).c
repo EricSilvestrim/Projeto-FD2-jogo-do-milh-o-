@@ -87,6 +87,7 @@ int main() {
     BancoDePerguntas *banco = NULL;
     int opcao;
     // int dadosCarregados = 0; // Removido - não utilizado
+    const char *arquivoBinario = "/home/ubuntu/dados/perguntas.bin";
     const char *arquivoCSVInicial = "/home/ubuntu/perguntas_iniciais.csv"; //Para rodar no Linux
     const char *arquivoCSVInicial = "C:\\Users\\danie\\Downloads\\perguntas_iniciais.csv"; //Para rodar no Windows. Mexam só para onde está o arquivo do csv
 
